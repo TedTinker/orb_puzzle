@@ -1,5 +1,7 @@
 import torch
 
+from general_FEP_RL.utils import device
+
 
 
 def episode(agent, env, sleep_time = 0):
@@ -13,7 +15,7 @@ def episode(agent, env, sleep_time = 0):
     
     while True:
         step += 1
-        image = torch.tensor(env.photo_for_agent()).unsqueeze(0).unsqueeze(0).to(dtype = torch.float)
+        image = torch.tensor(env.photo_for_agent()).unsqueeze(0).unsqueeze(0).to(dtype = torch.float, device = device)
         obs_dict = {"see_image" : image}
         
         step_dict = agent.step_in_episode(obs_dict)
@@ -32,7 +34,7 @@ def episode(agent, env, sleep_time = 0):
         step_dict_list.append(step_dict)
         
         if(done):
-            print(f"{step} steps, {reward}")
+        #    print(f"{step} steps, {reward}")
             break
             
     image = torch.tensor(env.photo_for_agent()).unsqueeze(0).unsqueeze(0).to(dtype = torch.float)
@@ -41,8 +43,8 @@ def episode(agent, env, sleep_time = 0):
     return(
         {"step_dict_list" : step_dict_list,
         "terminal_obs" : terminal_obs,
-        "positions_for_plot_list" : positions_for_plot_list}
-         )
+        "positions_for_plot_list" : positions_for_plot_list})
+         
     
     
     

@@ -11,14 +11,6 @@ from utils import relative_to
 
 
 
-image_size = 28
-max_wheel_speed = 25
-angular_scaler = .5
-steps_per_step = 30
-num_walls = 0
-
-
-
 physicsClient = p.connect(p.GUI)
 start_cam = (1, 90, -89, (0, 0, 5))
 p.resetDebugVisualizerCamera(1, 90, -89, (0, 0, 10), physicsClientId = physicsClient)
@@ -27,6 +19,16 @@ p.setGravity(0, 0, 0, physicsClientId = physicsClient)
 p.setTimeStep(1, physicsClientId=physicsClient)  # More accurate time step
 p.setPhysicsEngineParameter(numSolverIterations=1, numSubSteps=4, physicsClientId=physicsClient)
 p.setTimeStep(1/240)
+
+
+
+image_size = 16
+steps_per_step = 30
+max_wheel_speed = 5
+max_turn_per_step = pi/2
+dt = p.getPhysicsEngineParameters(physicsClientId=physicsClient)["fixedTimeStep"]
+angular_scalar = max_turn_per_step / ((2 * max_wheel_speed) * (steps_per_step * dt))
+num_walls = 0
 
 
     
@@ -147,20 +149,14 @@ class Environment():
         A = [-3, 0] 
         B = [3/2, 3*sqrt(3)/2] 
         C = [3/2, -3*sqrt(3)/2]
-        
         orb_positions = [A, B, C]
-        
-        # Random rotation angle
         theta = random.uniform(0, 2*pi)
         
         def rotate(point, angle):
             x, y = point
             return (
                 [x*cos(angle) - y*sin(angle),
-                x*sin(angle) + y*cos(angle)]
-            )
-        
-        # Rotate all points
+                x*sin(angle) + y*cos(angle)])
         orb_positions = [rotate(p, theta) for p in orb_positions]
         
         positions = [[0, 0]]
@@ -223,9 +219,9 @@ class Environment():
         for key, value in self.touching_orbs().items():
             if(value):
                 if(key == self.correct_orb_index):
-                    reward += 0
+                    reward += 10
                 else:
-                    reward += 0
+                    reward += 3
         return(reward)
             
         
@@ -271,7 +267,7 @@ class Environment():
         yaw = self.get_pos_orn_spe(self.robot_index)["yaw"]
         x = linear_velocity * cos(yaw)
         y = linear_velocity * sin(yaw)
-        angular_velocity = (wheel_speeds[0] - wheel_speeds[1]) * angular_scaler
+        angular_velocity = (wheel_speeds[0] - wheel_speeds[1]) * angular_scalar
         p.resetBaseVelocity(
             self.robot_index, 
             linearVelocity=[x, y, 0], 

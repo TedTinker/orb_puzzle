@@ -1,13 +1,18 @@
+#%% 
 import os 
-os.chdir(r"C:\Users\Ted\onedrive\Desktop\orb_puzzle") 
+folder = r"/home/ted/Desktop/orb_puzzle"
+os.chdir(folder) 
 
 import torch
+torch.set_default_device("cpu")
 import torch.nn as nn
 import torch.nn.functional as F
 from torchinfo import summary
 from torch.profiler import profile, record_function, ProfilerActivity
 
 from general_FEP_RL.utils_torch import init_weights, model_start, model_end
+
+from utils_torch import Interpolate
 
 
 
@@ -23,7 +28,7 @@ class Encode_Image(nn.Module):
         
         self.arg_dict = arg_dict
                 
-        self.example_input = torch.zeros(1, 1, 28, 28, 4)
+        self.example_input = torch.zeros((1, 1, 16, 16, 4), device = "cpu")
         if(verbose):
             print("\nEI Start:", self.example_input.shape)
 
@@ -83,7 +88,7 @@ class Encode_Image(nn.Module):
         if(verbose):
             print("EI End:")
             print("\toutput:", example.shape, "\n")
-        
+                    
         self.apply(init_weights)
         
         

@@ -1,5 +1,8 @@
+#%%
+
 import os 
-os.chdir(r"C:\Users\Ted\onedrive\Desktop\orb_puzzle") 
+folder = r"/home/ted/Desktop/orb_puzzle"
+os.chdir(folder) 
 
 import torch
 import torch.nn as nn
@@ -9,7 +12,7 @@ from torch.profiler import profile, record_function, ProfilerActivity
 
 from general_FEP_RL.utils_torch import init_weights, model_start, model_end, mu_std
 
-from utils_torch import rgb_to_circular_hsv
+from utils_torch import rgb_to_circular_hsv, Interpolate
 
 
 
@@ -35,13 +38,13 @@ class Decode_Image(nn.Module):
         self.a = nn.Sequential(
             nn.Linear(
                 in_features = hidden_state_size,
-                out_features = 16 * 7 * 7),
+                out_features = 16 * 4 * 4),
             nn.LeakyReLU())
         
         example = self.a(example)
         if(verbose): 
             print("\ta:", example.shape)
-        example = example.reshape(example.shape[0], 16, 7, 7)
+        example = example.reshape(example.shape[0], 16, 4, 4)
         if(verbose): 
             print("\tReshaped:", example.shape)
                 
@@ -96,7 +99,7 @@ class Decode_Image(nn.Module):
         example_log_prob = example_log_prob.mean(dim=(1, 2))
         
         [example_output, example_log_prob] = model_end(episodes, steps, [(example_output, "cnn"), (example_log_prob, "lin")])
-        example_output = example_output.reshape(episodes, steps, 28, 28, 4)
+        example_output = example_output.reshape(episodes, steps, 16, 16, 4)
         self.example_output = example_output
         if(verbose): 
             print("DI End:")
@@ -110,7 +113,7 @@ class Decode_Image(nn.Module):
     def forward(self, hidden_state):
         episodes, steps, [hidden_state] = model_start([(hidden_state, "lin")])
         a = self.a(hidden_state)
-        a = a.reshape(episodes * steps, 16, 7, 7)
+        a = a.reshape(episodes * steps, 16, 4, 4)
         b = self.b(a)
         output, log_prob = self.mu_std(b)
         output = F.sigmoid(output)
@@ -126,6 +129,7 @@ class Decode_Image(nn.Module):
         #return loss_value
         
         episodes, steps, H, W, C = predicted_values.shape
+        # total_loss = F.mse_loss(predicted_values, target_values, reduction='none')
         
         predicted_rgbd = predicted_values.reshape((episodes * steps, H, W, C)).permute(0, 3, 1, 2)
         predicted_rgb = predicted_rgbd[:, :-1]

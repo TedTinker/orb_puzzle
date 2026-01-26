@@ -1,3 +1,8 @@
+#%%
+import os 
+folder = r"/home/ted/Desktop/orb_puzzle"
+os.chdir(folder) 
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -54,14 +59,16 @@ class Decode_Wheel_Speeds(nn.Module):
     def forward(self, hidden_state):
         a = self.a(hidden_state)
         output, log_prob = self.mu_std(a)
-        output = F.sigmoid(output)
+        output = F.tanh(output)
+        log_det = torch.log(1 - output.pow(2) + 1e-6).sum(-1, keepdim=True)
+        log_prob = log_prob - log_det
         return(output, log_prob)
     
     
     
     @staticmethod
     def loss_func(true_values, predicted_values):
-        loss_value = F.binary_cross_entropy(predicted_values, true_values, reduction = "none")
+        loss_value = F.mse_loss(predicted_values, true_values, reduction = "none")
         return loss_value
     
     

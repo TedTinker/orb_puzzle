@@ -1,18 +1,8 @@
-import os
-
 from general_FEP_RL.agent import Agent
 from encoders.encode_image import Encode_Image
 from decoders.decode_image import Decode_Image
 from encoders.encode_wheel_speeds import Encode_Wheel_Speeds
 from decoders.decode_wheel_speeds import Decode_Wheel_Speeds
-
-
-os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-
-
-
-folder = r"C:\Users\Ted\OneDrive\Desktop\orb_puzzle"
-
 
 
 observation_dict = {
@@ -38,8 +28,8 @@ action_dict = {
             "zp_zq_sizes" : [256]},
         "decoder" : Decode_Wheel_Speeds,
         "decoder_arg_dict" : {},
-        "target_entropy" : -1,
-        "alpha_normal" : 1000,
+        "target_entropy" : -2,
+        "alpha_normal" : 25,
         "delta" : 0
         }
     }

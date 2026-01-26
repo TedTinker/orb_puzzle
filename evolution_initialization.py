@@ -1,3 +1,4 @@
+#%%
 import os
 import re
 
@@ -5,16 +6,13 @@ import torch
 
 from general_FEP_RL.buffer import RecurrentReplayBuffer
 
-from utils import plot_images, add_to_epoch_dict, plot_complete_epoch_dict, plot_positions
+from utils import plot_images, add_to_epoch_dict, plot_complete_epoch_dict, plot_positions, folder
 from environment import Environment
 from agent import agent
 from episode import episode, push
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-
-
-
-folder = r"C:\Users\Ted\OneDrive\Desktop\orb_puzzle"
+%matplotlib inline
 
 
 
@@ -23,7 +21,7 @@ pattern = re.compile(r"saved_agent_(\d+)\.pth")
 
 numbers = []
 
-for filename in os.listdir(folder + "/saved_agents"):
+for filename in os.listdir(folder + "/saved_agents_evo"):
     match = pattern.fullmatch(filename)
     if match:
         numbers.append(int(match.group(1)))
@@ -32,12 +30,12 @@ if numbers:
     start_epochs = max(numbers)
     print(f"\n\n\n\nStarting at {start_epochs}\n\n\n\n")
     agent.load_state_dict(
-        file = f"saved_agents/saved_agent_{start_epochs}", 
-        keys = ["world_model", "observation_models"])
+        file = f"saved_agents_evo/saved_agent_{start_epochs}", 
+        keys = None)
 
 
 
-agent.world_model.summary()
+#agent.world_model.summary() # Using this makes all models use CUDA if available!
 env = Environment()
 
 
@@ -50,11 +48,7 @@ agent.buffer = RecurrentReplayBuffer(
 
 
 
-agent.observation_dict["see_image"]['eta_before_clamp'] = 1
-agent.observation_dict["see_image"]['eta'] = 1
-agent.action_dict["make_wheel_speeds"]['alpha_normal'] = 1
-agent.action_dict["make_wheel_speeds"]['alpha_normal'] = 1
-agent.action_dict["make_wheel_speeds"]['target_entropy'] = -1
+
 
 
                     
@@ -74,6 +68,8 @@ for e in range(start_epochs, max_epochs):
         
     for ep in range(episodes_per_epoch):        
         episode_dict = episode(agent, env)
+        for step_dict in episode_dict["step_dict_list"]:
+            step_dict["reward"] = 0
         push(agent, episode_dict["step_dict_list"],  episode_dict["terminal_obs"])
         
     epoch_dict = agent.epoch(batch_size = batch_size)
@@ -94,6 +90,8 @@ for e in range(start_epochs, max_epochs):
             folder = folder, 
             epoch = e)
         
-        agent.get_state_dict(file = f"saved_agents/saved_agent_{e}")
+        agent.save_state_dict(file = f"saved_agents_evo/saved_agent_{e}")
 
 
+
+# %%

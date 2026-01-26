@@ -1,13 +1,20 @@
+#%%
+
 # I think entropy isn't applied correctly. 
 
 
 
 import os 
-os.chdir(r"C:\Users\Ted\onedrive\Desktop\orb_puzzle") 
+folder = r"/home/ted/Desktop/orb_puzzle"
+os.chdir(folder) 
 
 import math
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import pandas as pd
+
+import torch
+torch.set_default_device("cpu")
 
 
 
@@ -176,4 +183,24 @@ def plot_positions(positions_for_plot_list):
     plt.show()
     
     
-    
+
+def plot_results(results, episodes_per_epoch):
+    df = pd.DataFrame({'Result': results})
+    df['Epoch'] = df.index // episodes_per_epoch
+    df_counts = df.groupby(['Epoch', 'Result']).size().unstack(fill_value=0)
+    for col in ["None", "Orb", "Good Orb"]:
+        if col not in df_counts.columns:
+            df_counts[col] = 0
+    df_counts = df_counts[["None", "Orb", "Good Orb"]]
+    plt.figure(figsize=(10, 6))
+    plt.plot(df_counts.index, df_counts["None"], label="None", marker='o', markersize=3)
+    plt.plot(df_counts.index, df_counts["Orb"], label="Orb", marker='o', markersize=3)
+    plt.plot(df_counts.index, df_counts["Good Orb"], label="Good Orb", marker='o', markersize=3)
+
+    plt.title("Frequency of Results Over Epochs")
+    plt.xlabel("Epoch")
+    plt.ylabel("Count per Epoch")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()

@@ -1,12 +1,15 @@
-# Pretty sure im not using transitions correctlySSSSSSS
+#%%
+# Pretty sure im not using transitions correctly
 
-import os
+import os 
+folder = r"/home/ted/Desktop/orb_puzzle"
+os.chdir(folder) 
 
 import tkinter as tk
 
 import torch
 
-from utils import plot_positions
+from utils import plot_positions, folder
 from environment import Environment
 from agent import agent
 
@@ -14,17 +17,13 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 
-folder = r"C:\Users\Ted\OneDrive\Desktop\orb_puzzle"
+agent.load_state_dict(
+    file = "saved_agent", 
+    keys = None
 
 
 
-#agent.load_state_dict(
-#    file = "saved_agent", 
-#    keys = ["world_model", "observation_models"])
-
-
-
-agent.world_model.summary()
+#agent.world_model.summary()
 env = Environment()
 
 
