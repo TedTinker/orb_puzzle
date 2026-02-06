@@ -116,7 +116,8 @@ class Decode_Image(nn.Module):
         a = a.reshape(episodes * steps, 16, 4, 4)
         b = self.b(a)
         output, log_prob = self.mu_std(b)
-        output = F.sigmoid(output)
+        output = F.tanh(output)
+        output = (output + 1) / 2
         log_prob = log_prob.mean(dim = (1, 2))
         [output, log_prob] = model_end(episodes, steps, [(output, "cnn"), (log_prob, "lin")])
         return(output, log_prob)
@@ -178,8 +179,8 @@ if(__name__ == "__main__"):
     example_dict = {
         "decoder" : di,
         "target_entropy" : 1,
-        "accuracy_scaler" : 1,                               
-        "complexity_scaler" : 1,                                 
+        "accuracy_scalar" : 1,                               
+        "complexity_scalar" : 1,                                 
         "eta" : 1                                   
         }
     

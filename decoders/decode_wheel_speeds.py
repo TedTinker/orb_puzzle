@@ -33,6 +33,10 @@ class Decode_Wheel_Speeds(nn.Module):
             nn.Linear(
                 in_features = hidden_state_size,
                 out_features = 256),
+            nn.PReLU(),
+            nn.Linear(
+                in_features = 256,
+                out_features = 256),
             nn.PReLU())
         
         example = self.a(self.example_input)

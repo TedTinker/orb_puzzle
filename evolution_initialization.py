@@ -5,8 +5,9 @@ import re
 import torch
 
 from general_FEP_RL.buffer import RecurrentReplayBuffer
+from general_FEP_RL.plot_training_log import plot_training_log
 
-from utils import plot_images, add_to_epoch_dict, plot_complete_epoch_dict, plot_positions, folder
+from utils import plot_images, plot_positions, folder
 from environment import Environment
 from agent import agent
 from episode import episode, push
@@ -44,27 +45,19 @@ agent.buffer = RecurrentReplayBuffer(
     agent.world_model.observation_model_dict, 
     agent.world_model.action_model_dict, 
     capacity = 256, 
-    max_steps = 1)
+    max_steps = 6)
 
 
 
-
-
-
-                    
 max_epochs = 10000
+
 episodes_per_epoch = 16
-max_steps_per_episode = 1
+max_steps_per_episode = 6
 batch_size = 128
 
 
 
-complete_epoch_dict = {}
-
-
-
 for e in range(start_epochs, max_epochs): 
-    print(f"\nEpoch {e}")
         
     for ep in range(episodes_per_epoch):        
         episode_dict = episode(agent, env)
@@ -72,25 +65,30 @@ for e in range(start_epochs, max_epochs):
             step_dict["reward"] = 0
         push(agent, episode_dict["step_dict_list"],  episode_dict["terminal_obs"])
         
-    epoch_dict = agent.epoch(batch_size = batch_size)
-    add_to_epoch_dict(complete_epoch_dict, epoch_dict)
+    epoch_dict, epoch_dict_actor = agent.epoch(batch_size = batch_size)
     
     if(e % 10 == 0):
         plot_positions(episode_dict["positions_for_plot_list"])
                 
-        real_images = [obs[1, :, :, :-1] for obs in epoch_dict['obs']['see_image']][:25]
-        pred_images = [obs[:, :, :, :-1].squeeze(0) for obs in epoch_dict['pred_obs_q']['see_image']][:25]
-
+        real_images = [obs[:, :, :-1] for obs in agent.training_log['obs']['see_image'][-1][0]][:25]
+        pred_images_p = [obs[:, :, :-1] for obs in agent.training_log['pred_obs_p']['see_image'][-1][0]][:24]
+        pred_images_p = [real_images[0] * 0] + pred_images_p
+        pred_images_q = [obs[:, :, :-1] for obs in agent.training_log['pred_obs_q']['see_image'][-1][0]][:24]
+        pred_images_q = [real_images[0] * 0] + pred_images_q
+        
         plot_images(real_images, title = "REAL")
+        plot_images(pred_images_p, title = "PRED PRIOR")
+        plot_images(pred_images_q, title = "PRED POSTERIOR")
         
-        plot_images(pred_images, title = "PRED")
-        
-        plot_complete_epoch_dict(
-            complete_epoch_dict, 
+        plot_training_log(
+            agent, 
             folder = folder, 
             epoch = e)
         
         agent.save_state_dict(file = f"saved_agents_evo/saved_agent_{e}")
+        
+        print(f"\nEpoch {e}")
+
 
 
 

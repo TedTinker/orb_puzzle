@@ -120,8 +120,8 @@ if(__name__ == "__main__"):
     example_dict = {
         "encoder" : ei,
         "target_entropy" : 1,
-        "accuracy_scaler" : 1,                               
-        "complexity_scaler" : 1,                                 
+        "accuracy_scalar" : 1,                               
+        "complexity_scalar" : 1,                                 
         "eta" : 1                                   
         }
     

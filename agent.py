@@ -9,13 +9,13 @@ observation_dict = {
     "see_image" : {
         "encoder" : Encode_Image,
         "encoder_arg_dict" : {
-            "encode_size" : 1024,
-            "zp_zq_sizes" : [1024]},
+            "encode_size" : 256,
+            "zp_zq_sizes" : [256]},
         "decoder" : Decode_Image,
         "decoder_arg_dict" : {},
-        "accuracy_scalar" : 1000,                               
+        "accuracy_scalar" : 10,                               
         "beta_obs" : .001,                      
-        "eta_before_clamp" : 1,
+        "eta_before_clamp" : .01,
         "eta" : 0,
         }
     }
@@ -24,12 +24,12 @@ action_dict = {
     "make_wheel_speeds" : {
         "encoder" : Encode_Wheel_Speeds,
         "encoder_arg_dict" : {
-            "encode_size" : 256,
-            "zp_zq_sizes" : [256]},
+            "encode_size" : 128,
+            "zp_zq_sizes" : [128]},
         "decoder" : Decode_Wheel_Speeds,
         "decoder_arg_dict" : {},
-        "target_entropy" : -2,
-        "alpha_normal" : 25,
+        "target_entropy" : -1,
+        "alpha_normal" : 0,
         "delta" : 0
         }
     }
@@ -39,16 +39,20 @@ action_dict = {
 agent = Agent(
     observation_dict = observation_dict,       
     action_dict = action_dict,  
-    hidden_state_sizes = [1024],
+    hidden_state_sizes = [256],
     time_scales = [1], 
     beta_hidden = [],
     eta_before_clamp = [],
     eta = [],
-    number_of_critics = 1, 
-    tau = .99,
-    lr = .001,
+    number_of_critics = 2, 
+    tau = .1,
+    lr_world_model = .001,
+    lr_critic = .001,
+    lr_actor = .001,
+    lr_alpha = .1,
     weight_decay = .00001,
     gamma = .99,
+    d = 2,
     capacity = 128, 
     max_steps = 25)
 

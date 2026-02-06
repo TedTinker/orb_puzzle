@@ -16,9 +16,8 @@ start_cam = (1, 90, -89, (0, 0, 5))
 p.resetDebugVisualizerCamera(1, 90, -89, (0, 0, 10), physicsClientId = physicsClient)
 p.setAdditionalSearchPath("pybullet_data")
 p.setGravity(0, 0, 0, physicsClientId = physicsClient)
-p.setTimeStep(1, physicsClientId=physicsClient)  # More accurate time step
 p.setPhysicsEngineParameter(numSolverIterations=1, numSubSteps=4, physicsClientId=physicsClient)
-p.setTimeStep(1/240)
+p.setTimeStep(1/240, physicsClientId=physicsClient)
 
 
 
@@ -94,16 +93,18 @@ class Wall:
         
         
 def make_positions(positions, n):
-    min_distance = 2
-    max_distance = 5
+    min_sep = 4
+    min_radius = 2
+    max_radius = 5
     start_length = len(positions)
-    while(len(positions) < start_length + n):
-        # I would rather this be circular.
-        x = random.uniform(max_distance, -max_distance)
-        y = random.uniform(max_distance, -max_distance)
-        if all(hypot(x - pos[0], y - pos[1]) >= min_distance for pos in positions):
+    while len(positions) < start_length + n:
+        theta = random.uniform(0, 2*pi)
+        r = sqrt(random.uniform(min_radius**2, max_radius**2))
+        x = r * cos(theta)
+        y = r * sin(theta)
+        if all(hypot(x - px, y - py) >= min_sep for px, py in positions):
             positions.append([x, y])
-    return(positions[-n:])
+    return positions[-n:]
 
 
 
@@ -150,14 +151,14 @@ class Environment():
         B = [3/2, 3*sqrt(3)/2] 
         C = [3/2, -3*sqrt(3)/2]
         orb_positions = [A, B, C]
-        theta = random.uniform(0, 2*pi)
+        #theta = random.uniform(0, 2*pi)
         
-        def rotate(point, angle):
-            x, y = point
-            return (
-                [x*cos(angle) - y*sin(angle),
-                x*sin(angle) + y*cos(angle)])
-        orb_positions = [rotate(p, theta) for p in orb_positions]
+        #def rotate(point, angle):
+        #    x, y = point
+        #    return (
+        #        [x*cos(angle) - y*sin(angle),
+        #        x*sin(angle) + y*cos(angle)])
+        #orb_positions = [rotate(p, theta) for p in orb_positions]
         
         positions = [[0, 0]]
         #orb_positions = make_positions(positions, len(self.orbs))
@@ -187,8 +188,8 @@ class Environment():
         
         pos_orn_spe = self.get_pos_orn_spe(self.robot_index)
         left_wheel_speed_start, right_wheel_speed_start = self.wheel_speeds[0], self.wheel_speeds[1]
-        left_wheel_speed_end = relative_to(left_wheel_speed, -max_wheel_speed, max_wheel_speed)
-        right_wheel_speed_end = relative_to(right_wheel_speed, -max_wheel_speed, max_wheel_speed)
+        left_wheel_speed_end = relative_to(left_wheel_speed, 0, -max_wheel_speed)
+        right_wheel_speed_end = relative_to(right_wheel_speed, 0, -max_wheel_speed)
         
         change_in_left_wheel = left_wheel_speed_end - left_wheel_speed_start
         change_in_left_wheel_per_step = change_in_left_wheel / steps_per_step
@@ -216,13 +217,16 @@ class Environment():
     # Reward
     def reward(self):
         reward = 0
+        orb = "None"
         for key, value in self.touching_orbs().items():
             if(value):
                 if(key == self.correct_orb_index):
                     reward += 10
+                    orb = "Good Orb"
                 else:
                     reward += 3
-        return(reward)
+                    orb = "Orb"
+        return(reward, orb)
             
         
             
@@ -337,12 +341,11 @@ class Environment():
         pos["orbs"] = []
         pos["walls"] = []
         for orb in self.orbs:
-            pos["orbs"].append(orb.pos)
+            pos["orbs"].append(orb)
         for wall in self.walls:
-            pos["walls"].append(wall.pos)
+            pos["walls"].append(wall)
         return(pos)
     
-        
     
     
 if __name__ == "__main__":
