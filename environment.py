@@ -151,14 +151,14 @@ class Environment():
         B = [3/2, 3*sqrt(3)/2] 
         C = [3/2, -3*sqrt(3)/2]
         orb_positions = [A, B, C]
-        #theta = random.uniform(0, 2*pi)
+        theta = random.uniform(0, 2*pi)
         
-        #def rotate(point, angle):
-        #    x, y = point
-        #    return (
-        #        [x*cos(angle) - y*sin(angle),
-        #        x*sin(angle) + y*cos(angle)])
-        #orb_positions = [rotate(p, theta) for p in orb_positions]
+        def rotate(point, angle):
+            x, y = point
+            return (
+                [x*cos(angle) - y*sin(angle),
+                x*sin(angle) + y*cos(angle)])
+        orb_positions = [rotate(p, theta) for p in orb_positions]
         
         positions = [[0, 0]]
         #orb_positions = make_positions(positions, len(self.orbs))

@@ -74,6 +74,50 @@ for e in range(epochs):
         
         print(f"\nEpoch {e}")
         
+        print(len(agent.training_log["epoch_num"]))
+        print(agent.training_log["epoch_num"])
+        
         #agent.save_state_dict(file = f"saved_agents_play/saved_agent_{e}")
         
+        
+        
 # %%
+
+
+import numpy as np 
+import math
+
+
+def downscale(l, maxlen=7):
+    if len(l) <= maxlen:
+        return l
+
+    span = l[-1] - l[0]
+    ideal = span / (maxlen - 1)
+
+    # compute "badness" for removing each interior point
+    best_i = None
+    best_cost = None
+
+    for i in range(1, len(l)-1):
+        left_gap = l[i] - l[i-1]
+        right_gap = l[i+1] - l[i]
+        merged = left_gap + right_gap
+
+        # cost measures how far gaps deviate from ideal after removal
+        cost = (merged - ideal) ** 2
+
+        if best_cost is None or cost < best_cost:
+            best_cost = cost
+            best_i = i
+
+    del l[best_i]
+    return l
+
+
+
+l = []
+for i in range(50000):
+    l.append(i)
+    l = downscale(l)
+    print(l)

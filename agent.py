@@ -9,8 +9,8 @@ observation_dict = {
     "see_image" : {
         "encoder" : Encode_Image,
         "encoder_arg_dict" : {
-            "encode_size" : 256,
-            "zp_zq_sizes" : [256]},
+            "encode_size" : 128,
+            "zp_zq_sizes" : [128]},
         "decoder" : Decode_Image,
         "decoder_arg_dict" : {},
         "accuracy_scalar" : 10,                               
@@ -24,8 +24,8 @@ action_dict = {
     "make_wheel_speeds" : {
         "encoder" : Encode_Wheel_Speeds,
         "encoder_arg_dict" : {
-            "encode_size" : 128,
-            "zp_zq_sizes" : [128]},
+            "encode_size" : 64,
+            "zp_zq_sizes" : [64]},
         "decoder" : Decode_Wheel_Speeds,
         "decoder_arg_dict" : {},
         "target_entropy" : -1,
@@ -54,7 +54,8 @@ agent = Agent(
     gamma = .99,
     d = 2,
     capacity = 128, 
-    max_steps = 25)
+    max_steps = 25,
+    max_epochs_in_log = 64)
 
 
 
