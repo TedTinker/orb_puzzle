@@ -1,8 +1,8 @@
 #%% 
 
 import os 
-folder = r"/home/ted/Desktop/orb_puzzle"
-os.chdir(folder) 
+#folder = r"/home/ted/Desktop/orb_puzzle"
+#os.chdir(folder) 
 
 import torch
 import torch.nn as nn

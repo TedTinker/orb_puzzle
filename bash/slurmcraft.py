@@ -75,6 +75,34 @@ def add_this(name, args):
                         if(if_arg_name in value and value[if_arg_name] == if_arg):
                             new_value[arg_name] = condition[1]
         slurm_dict[new_key] = new_value
+        
+        
+
+add_this('e',   {
+    'target_entropy' : [-2, -1, -.1],
+    'alpha_normal' : [0, .5],
+    'eta' : [0, .5, 1]})   
+
+
+
+# Add these arguments to slurm_dict.
+def add_this(name, args):
+    keys, values = [], []
+    for key, value in slurm_dict.items(): keys.append(key) ; values.append(value)
+    for key, value in zip(keys, values):  
+        if(key == 'd'): key = ''
+        between = '' if key == '' or len(name) == 1 else '_'
+        new_key = key + between + name 
+        new_value = deepcopy(value)
+        for arg_name, arg in args.items():
+            if(type(arg) != list): new_value[arg_name] = arg
+            elif(type(arg[0]) != list): new_value[arg_name] = arg
+            else:
+                for condition in arg:
+                    for if_arg_name, if_arg in condition[0].items():
+                        if(if_arg_name in value and value[if_arg_name] == if_arg):
+                            new_value[arg_name] = condition[1]
+        slurm_dict[new_key] = new_value
 
 
 
@@ -93,8 +121,10 @@ def get_args(name):
     return(s)
 
 def all_like_this(this): 
-    if(this in ['break', 'empty_space']): result = [this]
-    elif(this[-1] != '_'):                result = [this]
+    if(this in ['break', 'empty_space']): 
+        result = [this]
+    elif(this[-1] != '_'):                
+        result = [this]
     else: result = [key for key in slurm_dict.keys() if key.startswith(this) and key[len(this):].isdigit()]
     return(json.dumps(result))
 
@@ -149,7 +179,7 @@ f'''
 {partition}
 #SBATCH --ntasks={max_cpus}
 {module}
-singularity exec{nv} orb_puzzle.sif python orb_puzzle/main.py --comp {args.comp} --arg_name {name} {get_args(name)} --agents $agents_per_job --previous_agents $previous_agents
+singularity exec{nv} communication.sif python orb_puzzle/main.py --comp {args.comp} --arg_name {name} {get_args(name)} --agents $agents_per_job --previous_agents $previous_agents
 '''[2:])
             
     with open('finish_dicts.slurm', 'w') as f:
@@ -157,7 +187,7 @@ singularity exec{nv} orb_puzzle.sif python orb_puzzle/main.py --comp {args.comp}
 f'''
 {partition}
 {module}
-singularity exec{nv} orb_puzzle.sif python orb_puzzle/finish_dicts.py --comp {args.comp} --arg_title {combined} --arg_name finishing_dictionaries
+singularity exec{nv} communication.sif python orb_puzzle/finish_dicts.py --comp {args.comp} --arg_title {combined} --arg_name finishing_dictionaries
 '''[2:])
         
     with open('plotting.slurm', 'w') as f:
@@ -165,7 +195,7 @@ singularity exec{nv} orb_puzzle.sif python orb_puzzle/finish_dicts.py --comp {ar
 f'''
 {partition}
 {module}
-singularity exec{nv} orb_puzzle.sif python orb_puzzle/plotting.py --comp {args.comp} --arg_title {combined} --arg_name plotting
+singularity exec{nv} communication.sif python orb_puzzle/plotting.py --comp {args.comp} --arg_title {combined} --arg_name plotting
 '''[2:])
         
 

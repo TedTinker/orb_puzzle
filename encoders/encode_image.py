@@ -1,7 +1,7 @@
 #%% 
 import os 
-folder = r"/home/ted/Desktop/orb_puzzle"
-os.chdir(folder) 
+#folder = r"/home/ted/Desktop/orb_puzzle"
+#os.chdir(folder) 
 
 import torch
 torch.set_default_device("cpu")

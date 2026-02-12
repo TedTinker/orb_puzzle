@@ -7,7 +7,8 @@ import torch
 from general_FEP_RL.buffer import RecurrentReplayBuffer
 from general_FEP_RL.plot_training_log import plot_training_log
 
-from utils import plot_images, plot_positions, folder
+from utils import folder
+from plotting import plot_images, plot_positions
 from environment import Environment
 from agent import agent
 from episode import episode, push

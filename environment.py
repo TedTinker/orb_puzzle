@@ -7,17 +7,36 @@ from skimage.transform import resize
 import random
 import colorsys
 
-from utils import relative_to
+from utils import args, relative_to
 
 
 
-physicsClient = p.connect(p.GUI)
-start_cam = (1, 90, -89, (0, 0, 5))
-p.resetDebugVisualizerCamera(1, 90, -89, (0, 0, 10), physicsClientId = physicsClient)
-p.setAdditionalSearchPath("pybullet_data")
-p.setGravity(0, 0, 0, physicsClientId = physicsClient)
-p.setPhysicsEngineParameter(numSolverIterations=1, numSubSteps=4, physicsClientId=physicsClient)
-p.setTimeStep(1/240, physicsClientId=physicsClient)
+def get_physics(GUI, w=10, h=10):
+    """
+    Set up PyBullet physics engine and environment.
+    """
+    if GUI:
+        physicsClient = p.connect(p.GUI)
+        start_cam = (1, 90, -89, (w / 2, h / 2, w))
+        p.resetDebugVisualizerCamera(1, 90, -89, (w / 2, h / 2, w), physicsClientId=physicsClient)
+
+        tk_thread = threading.Thread(target=run_tk, args=(physicsClient, start_cam))
+        tk_thread.daemon = True
+        tk_thread.start()
+    else:
+        physicsClient = p.connect(p.DIRECT)
+        p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0, physicsClientId=physicsClient)
+
+    p.setAdditionalSearchPath('pybullet_data')
+    p.setGravity(0, 0, -9.8, physicsClientId=physicsClient)
+    p.setPhysicsEngineParameter(
+        numSolverIterations=1,
+        numSubSteps=4,
+        physicsClientId=physicsClient
+    )
+    return physicsClient
+
+physicsClient = get_physics(args.GUI)
 
 
 
@@ -147,21 +166,21 @@ class Environment():
         self.set_orn(self.robot_start_orientation)
         self.set_wheel_speeds()    
         
-        A = [-3, 0] 
-        B = [3/2, 3*sqrt(3)/2] 
-        C = [3/2, -3*sqrt(3)/2]
-        orb_positions = [A, B, C]
-        theta = random.uniform(0, 2*pi)
+        #A = [-3, 0] 
+        #B = [3/2, 3*sqrt(3)/2] 
+        #C = [3/2, -3*sqrt(3)/2]
+        #orb_positions = [A, B, C]
+        #theta = random.uniform(0, 2*pi)
         
-        def rotate(point, angle):
-            x, y = point
-            return (
-                [x*cos(angle) - y*sin(angle),
-                x*sin(angle) + y*cos(angle)])
-        orb_positions = [rotate(p, theta) for p in orb_positions]
+        #def rotate(point, angle):
+        #    x, y = point
+        #    return (
+        #        [x*cos(angle) - y*sin(angle),
+        #        x*sin(angle) + y*cos(angle)])
+        #orb_positions = [rotate(p, theta) for p in orb_positions]
         
         positions = [[0, 0]]
-        #orb_positions = make_positions(positions, len(self.orbs))
+        orb_positions = make_positions(positions, len(self.orbs))
         wall_positions = make_positions(positions + orb_positions, len(self.walls))
                     
         h = random.random() 
@@ -344,6 +363,8 @@ class Environment():
             pos["orbs"].append(orb)
         for wall in self.walls:
             pos["walls"].append(wall)
+        reward, orb = self.reward()
+        pos["final_orb"] = orb
         return(pos)
     
     

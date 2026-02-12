@@ -10,10 +10,11 @@ from time import sleep
 from math import floor
 
 from utils import args, folder, duration, estimate_total_duration, print
-from agent import Agent
+from play_agent import train_agent
 
 print('\nname:\n{}'.format(args.arg_name))
 print('\nagents: {}. previous_agents: {}.'.format(args.agents, args.previous_agents))
+
 
 
 def train(q, i):
@@ -35,15 +36,8 @@ def train(q, i):
 
     print(f'\nagent {i}: cpu {cpu_id}\n')
 
-    if args.load_agents:
-        with open(folder + '/agents/agent_' + str(i).zfill(3) + '.pickle', 'rb') as handle:
-            agent = pickle.load(handle)
-        agent.start_physics()
-        agent.args = args
-    else:
-        agent = Agent(args=args, i=i)
+    train_agent(q, i)
 
-    agent.training(q)
 
 
 if __name__ == '__main__':
@@ -58,7 +52,7 @@ if __name__ == '__main__':
         process.start()
 
     # Progress tracking
-    progress_dict      = {i: '0'   for i in range(1 + args.previous_agents, 1 + args.agents + args.previous_agents)}
+    progress_dict      = {i: '0'  for i in range(1 + args.previous_agents, 1 + args.agents + args.previous_agents)}
     prev_progress_dict = {i: None for i in range(1 + args.previous_agents, 1 + args.agents + args.previous_agents)}
 
     while any(process.is_alive() for process in processes) or not queue.empty():

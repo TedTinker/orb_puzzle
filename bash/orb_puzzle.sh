@@ -9,7 +9,7 @@ real_arg_list=()
 for arg in ${arg_list[*]}
 do
     temp_file=$(mktemp)
-    singularity exec orb_puzzle.sif python -c "from orb_puzzle.bash.slurmcraft import all_like_this; result = all_like_this('$arg'); print(result, file=open('${temp_file}', 'w'))"
+    singularity exec communication.sif python -c "from orb_puzzle.bash.slurmcraft import all_like_this; result = all_like_this('$arg'); print(result, file=open('${temp_file}', 'w'))"
     returned_value=$(cat ${temp_file})
     #real_arg_list=$(echo "${real_arg_list}${returned_value}" | jq -s 'add')
     real_arg_list=$(python -c "import json; a = json.loads('""$real_arg_list""') if '""$real_arg_list""' else []; b = json.loads('""$returned_value""') if '""$returned_value""' else []; print(json.dumps(a+b))")
@@ -17,7 +17,7 @@ do
 done
 
 arg_list=$real_arg_list
-singularity exec orb_puzzle.sif python orb_puzzle/bash/slurmcraft.py --comp ${comp} --agents ${agents} --arg_list "${arg_list}"
+singularity exec communication.sif python orb_puzzle/bash/slurmcraft.py --comp ${comp} --agents ${agents} --arg_list "${arg_list}"
 arg_list=$(echo "${arg_list}" | tr -d '[]"' | sed 's/,/, /g')
 wait
 

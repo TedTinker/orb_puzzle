@@ -1,8 +1,11 @@
 from general_FEP_RL.agent import Agent
+
 from encoders.encode_image import Encode_Image
 from decoders.decode_image import Decode_Image
 from encoders.encode_wheel_speeds import Encode_Wheel_Speeds
 from decoders.decode_wheel_speeds import Decode_Wheel_Speeds
+
+from utils import args
 
 
 observation_dict = {
@@ -13,10 +16,10 @@ observation_dict = {
             "zp_zq_sizes" : [128]},
         "decoder" : Decode_Image,
         "decoder_arg_dict" : {},
-        "accuracy_scalar" : 10,                               
-        "beta_obs" : .001,                      
+        "accuracy_scalar" : args.accuracy_scalar,                               
+        "beta_obs" : args.beta_obs,                      
         "eta_before_clamp" : .01,
-        "eta" : 0,
+        "eta" : args.eta,
         }
     }
 
@@ -28,8 +31,8 @@ action_dict = {
             "zp_zq_sizes" : [64]},
         "decoder" : Decode_Wheel_Speeds,
         "decoder_arg_dict" : {},
-        "target_entropy" : -1,
-        "alpha_normal" : 0,
+        "target_entropy" : args.target_entropy,
+        "alpha_normal" : args.alpha_normal,
         "delta" : 0
         }
     }
@@ -55,7 +58,7 @@ agent = Agent(
     d = 2,
     capacity = 128, 
     max_steps = 25,
-    max_epochs_in_log = 64)
+    max_epochs_in_log = 8)
 
 
 
