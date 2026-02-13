@@ -5,9 +5,12 @@ import os
 folder = r"/home/ted/Desktop/orb_puzzle"
 os.chdir(folder) 
 
+import pickle
+
 import torch
 
-from utils import plot_positions, folder, plot_images
+from utils import folder
+from plotting import plot_positions, plot_images
 from environment import Environment
 from episode import episode, step, push
 from agent import agent
@@ -17,9 +20,9 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 
-#agent.load_state_dict(
-#    file = "saved_agent", 
-#    keys = None)
+agent.load_state_dict(
+    file = "saved_agent", 
+    keys = ["world_model", "observation_models"])
 
 
 
@@ -34,21 +37,10 @@ batch_size = 64
 
 
 
-while True:   
-    step_num = 0
-    while True:
-        
-        step_dict, positions_for_plot = step(agent, env, sleep_time = .01, human_action = True, step_num = step_num)
-        step_num += 1
-        
-        plot_images(
-            [
-                step_dict["obs"]["see_image"][0][0][:,:,:-1], 
-                step_dict["pred_obs_p"]["see_image"][0][0][:,:,:-1], 
-                step_dict["pred_obs_q"]["see_image"][0][0][:,:,:-1]], 
-            "OBS, PRED P, PRED Q", 
-            show=True, name="", folder="")
+while True:        
+    episode_dict = episode(agent, env, sleep_time = .0001, human_action = True)
+    push(agent, episode_dict["step_dict_list"], episode_dict["terminal_obs"], human_action = True) 
+            
+    with open(f'saved_buffers/saved_buffer.pickle', 'wb') as handle:
+        pickle.dump(agent.buffer, handle)
 
-        if(step_dict["done"]):
-            break
-    

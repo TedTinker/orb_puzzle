@@ -19,6 +19,8 @@ def train_agent(q = None, agent_num = 0):
     agent.load_state_dict(
         file = "saved_agent", 
         keys = ["world_model", "observation_models"])
+    with open(f'saved_buffer.pickle', 'rb') as f:
+        agent.buffer = pickle.load(f)
 
 
 
@@ -46,7 +48,7 @@ def train_agent(q = None, agent_num = 0):
                 
         epoch_dict, epoch_dict_actor = agent.epoch(batch_size = args.batch_size)
         
-        if(e % 50 == 0):
+        if(e % 10 == 0):
 
             plot_positions(episode_dict["positions_for_plot_list"], show=False, name=f"positions_agent_{agent_num}_epoch_{e}", folder="positions")
                     
@@ -56,26 +58,30 @@ def train_agent(q = None, agent_num = 0):
             pred_images_q = [obs[:, :, :-1] for obs in agent.training_log['pred_obs_q']['see_image'][-1][0]][:24]
             pred_images_q = [real_images[0] * 0] + pred_images_q
             
-            plot_images(real_images, title = "REAL", show=False, name=f"images_{agent_num}_real_agent", folder="images")
-            #plot_images(pred_images_p, title = "PRED PRIOR")
-            plot_images(pred_images_q, title = "PRED POSTERIOR", show=False, name=f"images_agent_{agent_num}_predicted", folder="images")
+            plot_images(real_images, title = "REAL", show=True) #, name=f"images_{str(agent_num).zfill(3)}_real_agent", folder="images")
+            plot_images(pred_images_p, title = "PRED PRIOR")
+            plot_images(pred_images_q, title = "PRED POSTERIOR", show=True) #, name=f"images_agent_{str(agent_num).zfill(3)}_predicted", folder="images")
             
             plot_results(results, args.episodes_per_epoch, show = True, name=f"results_agent_{agent_num}", folder="results")
              
-            os.makedirs(f'saved_{args.comp}/thesis_pics/training_log', exist_ok=True)
+            #os.makedirs(f'saved_{args.comp}/thesis_pics/training_log', exist_ok=True)
         
             fig = plot_training_log(agent)
-            fig.savefig(f"saved_{args.comp}/thesis_pics/training_log/{args.arg_name}_training_log_agent_{agent_num}.png")
+            #fig.savefig(f"saved_{args.comp}/thesis_pics/training_log/{args.arg_name}_training_log_agent_{str(agent_num).zfill(3)}.png")
+            plt.show()
             plt.close(fig)
-            
-            print(f"\nEpoch {e}")
-            
-            print(len(agent.training_log["epoch_num"]))
-            print(agent.training_log["epoch_num"])
                         
-            with open(f'{folder}/agent_training_log_{str(agent_num).zfill(3)}.pickle', 'wb') as handle:
-                pickle.dump(agent.training_log, handle)
-        
+            print("Number of epochs in training log:", len(agent.training_log["epoch_num"]))
+            print("Epoch numbers:", agent.training_log["epoch_num"])
+                        
+            #with open(f'{folder}/agent_training_log_{str(agent_num).zfill(3)}.pickle', 'wb') as handle:
+            #    pickle.dump(agent.training_log, handle)
+                
+                
+                
+if __name__ == "__main__":
+    train_agent(q = None, agent_num = 0)
+
         
         
 # %%

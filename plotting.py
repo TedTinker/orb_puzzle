@@ -23,10 +23,10 @@ def plot_images(images, title, show=True, name="", folder=""):
             (0, 0), 1, 1, transform=ax.transAxes,
             linewidth=2, edgecolor='black', facecolor='none')
         ax.add_patch(rect)
-    if name:
+    if name and not args.local:
         os.makedirs(f'saved_{args.comp}/thesis_pics/{folder}', exist_ok=True)
         plt.savefig(f'saved_{args.comp}/thesis_pics/{folder}/{args.arg_name}_{name}.png')
-    if show:
+    if show and args.local:
         plt.show()
     plt.close()
     
@@ -66,10 +66,10 @@ def plot_positions(positions_for_plot_list, show=True, name="", folder=""):
     plt.axis('equal') # Ensures X and Y scales are the same to prevent distortion
     plt.grid(True, linestyle='--', alpha=0.6)
     plt.legend()
-    if name:
+    if name and not args.local:
         os.makedirs(f'saved_{args.comp}/thesis_pics/{folder}', exist_ok=True)
         plt.savefig(f'saved_{args.comp}/thesis_pics/{folder}/{args.arg_name}_{name}.png')
-    if(show):
+    if(show) and args.local:
         plt.show()
     plt.close()
     
@@ -108,11 +108,11 @@ def plot_results(results, episodes_per_epoch, rolling_window=10, show=True, name
     plt.grid(True)
     plt.tight_layout()
 
-    if name:
+    if name and not args.local:
         os.makedirs(f'saved_{args.comp}/thesis_pics/{folder}', exist_ok=True)
         plt.savefig(f'saved_{args.comp}/thesis_pics/{folder}/{args.arg_name}_{name}.png', dpi=300)
 
-    if show:
+    if(show) and args.local:
         plt.show()
 
     plt.close()

@@ -4,6 +4,8 @@ import torch
 
 from general_FEP_RL.utils import device
 
+from plotting import plot_positions, plot_images
+
 
 
 def human_wheel_override(wheel_speeds):
@@ -86,11 +88,20 @@ def step(agent, env, sleep_time, human_action = False, step_num = 0):
     obs_dict = {"see_image" : image}
     
     step_dict = agent.step_in_episode(obs_dict)
+    if human_action:
+        plot_images([
+            step_dict["obs"]["see_image"][0][0][:,:,:-1], 
+            step_dict["pred_obs_p"]["see_image"][0][0][:,:,:-1], 
+            step_dict["pred_obs_q"]["see_image"][0][0][:,:,:-1]],
+            "OBS, PRED P, PRED Q", 
+            show=True, name="", folder="")
+        
     wheel_speeds = step_dict["action"]["make_wheel_speeds"].squeeze(0).squeeze(0).tolist()
 
     if human_action:
         wheel_speeds = human_wheel_override(wheel_speeds)
     positions_for_plot = env.step(wheel_speeds[0], wheel_speeds[1], sleep_time = sleep_time)
+    
     reward, orb = env.reward()
     
     done = (step_num == agent.buffer.max_episode_len - 1) or reward > 0
@@ -98,12 +109,17 @@ def step(agent, env, sleep_time, human_action = False, step_num = 0):
     step_dict["reward"] = reward
     step_dict["orb"] = orb
     step_dict["done"] = done 
+        
+    if human_action:
+        step_dict["best_action"] = step_dict["action"]
+        wheel_speeds = torch.tensor(wheel_speeds).unsqueeze(0).unsqueeze(0)
+        step_dict["action"]["make_wheel_speeds"] = wheel_speeds
     
     return step_dict, positions_for_plot
          
     
     
-def push(agent, step_dict_list, terminal_obs):
+def push(agent, step_dict_list, terminal_obs, human_action = False):
     for i in range(len(step_dict_list)):
         if(step_dict_list[i]["done"]):
             next_obs = terminal_obs
@@ -115,4 +131,4 @@ def push(agent, step_dict_list, terminal_obs):
             reward = step_dict_list[i]["reward"], 
             next_observation_dict = next_obs,
             done = step_dict_list[i]["done"],
-            best_action_dict = None)
+            best_action_dict = step_dict_list[i]["best_action"] if human_action else None)

@@ -14,7 +14,6 @@ from agent import agent
 from episode import episode, push
 
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
-%matplotlib inline
 
 
 

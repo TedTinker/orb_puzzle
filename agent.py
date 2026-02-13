@@ -8,6 +8,7 @@ from decoders.decode_wheel_speeds import Decode_Wheel_Speeds
 from utils import args
 
 
+
 observation_dict = {
     "see_image" : {
         "encoder" : Encode_Image,
@@ -33,7 +34,7 @@ action_dict = {
         "decoder_arg_dict" : {},
         "target_entropy" : args.target_entropy,
         "alpha_normal" : args.alpha_normal,
-        "delta" : 0
+        "delta" : 2
         }
     }
 
@@ -58,7 +59,7 @@ agent = Agent(
     d = 2,
     capacity = 128, 
     max_steps = 25,
-    max_epochs_in_log = 8)
+    max_epochs_in_log = 128)
 
 
 

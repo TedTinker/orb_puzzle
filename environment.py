@@ -15,14 +15,10 @@ def get_physics(GUI, w=10, h=10):
     """
     Set up PyBullet physics engine and environment.
     """
-    if GUI:
+    if GUI and args.local:
         physicsClient = p.connect(p.GUI)
         start_cam = (1, 90, -89, (w / 2, h / 2, w))
         p.resetDebugVisualizerCamera(1, 90, -89, (w / 2, h / 2, w), physicsClientId=physicsClient)
-
-        tk_thread = threading.Thread(target=run_tk, args=(physicsClient, start_cam))
-        tk_thread.daemon = True
-        tk_thread.start()
     else:
         physicsClient = p.connect(p.DIRECT)
         p.configureDebugVisualizer(p.COV_ENABLE_RENDERING, 0, physicsClientId=physicsClient)
@@ -129,7 +125,7 @@ def make_positions(positions, n):
 
 class Environment():
     def __init__(self):
-        
+                
         self.robot_start_position = [0, 0, .5]
         self.robot_start_orientation = [pi/2, 0, 0]
         self.wheel_speeds = [0, 0]
@@ -165,19 +161,6 @@ class Environment():
         self.set_pos(self.robot_start_position)
         self.set_orn(self.robot_start_orientation)
         self.set_wheel_speeds()    
-        
-        #A = [-3, 0] 
-        #B = [3/2, 3*sqrt(3)/2] 
-        #C = [3/2, -3*sqrt(3)/2]
-        #orb_positions = [A, B, C]
-        #theta = random.uniform(0, 2*pi)
-        
-        #def rotate(point, angle):
-        #    x, y = point
-        #    return (
-        #        [x*cos(angle) - y*sin(angle),
-        #        x*sin(angle) + y*cos(angle)])
-        #orb_positions = [rotate(p, theta) for p in orb_positions]
         
         positions = [[0, 0]]
         orb_positions = make_positions(positions, len(self.orbs))
@@ -366,7 +349,7 @@ class Environment():
         reward, orb = self.reward()
         pos["final_orb"] = orb
         return(pos)
-    
+        
     
     
 if __name__ == "__main__":

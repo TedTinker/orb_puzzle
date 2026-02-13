@@ -9,6 +9,7 @@ import argparse, ast
 import pickle
 import datetime
 import builtins
+import matplotlib
 
 import torch
 device = torch.device('cpu')
@@ -77,7 +78,7 @@ parser.add_argument('--device',                         type=str,           defa
                     help='Which device to use for Torch.')
 parser.add_argument('--cpu',                            type=int,           default = 0,
                     help='Which cpu for affinity.')
-parser.add_argument('--local',                          type=bool,          default = False,
+parser.add_argument('--local',                          type=bool,          default = True,
                     help='Is this running on a local machine for testing?')  
 
     # Agent Arguments
@@ -95,13 +96,13 @@ parser.add_argument('--eta',                            type=float,         defa
     # Other
 parser.add_argument('--epochs',                         type=int,           default = 1000,
                     help='')  
-parser.add_argument('--episodes_per_epoch',             type=int,           default = 16,
+parser.add_argument('--episodes_per_epoch',             type=int,           default = 4,
                     help='')  
 parser.add_argument('--batch_size',                     type=float,         default = 64,
                     help='')  
 
     # Misc
-parser.add_argument('--GUI',                            type=str,           default = False,
+parser.add_argument('--GUI',                            type=str,           default = True,
                     help='Show pybullet with GUI?') 
 
 # Make arguments.
@@ -129,6 +130,13 @@ def update_args(arg_set):
 for arg_set in [default_args, args]:
     default_args = update_args(default_args) 
     args = update_args(args)
+    
+    
+    
+# I believe this should plot correctly.
+#%matplotlib inline
+if not args.local:
+    matplotlib.use('Agg')
     
     
 
